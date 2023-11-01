@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 public class Transfer {
 
     private int transferId;
+    @NotNull(message = "senderId field must contain a value.")
     private int senderId;
     @NotNull(message = "recipientId field must contain a value.")
     private int recipientId;

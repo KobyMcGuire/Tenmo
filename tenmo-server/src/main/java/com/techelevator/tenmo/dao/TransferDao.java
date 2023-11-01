@@ -12,7 +12,7 @@ public interface TransferDao {
 
     boolean validateSendTransfer(Transfer transfer);
 
-//    Transfer createTransfer(Transfer transfer);
+    Transfer createTransfer(Transfer transfer);
 
     void updateAccountBalances(Transfer transfer);
 

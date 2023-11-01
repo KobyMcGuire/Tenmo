@@ -47,6 +47,8 @@ public class TenmoService {
         return users;
     }
 
+    //TODO - CREATE TRANSFER (bundle userId into object)
+
 
     private HttpEntity<Void> makeAuthEntity() {
         HttpHeaders headers = new HttpHeaders();

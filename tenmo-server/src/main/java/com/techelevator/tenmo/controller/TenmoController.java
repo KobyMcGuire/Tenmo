@@ -46,24 +46,20 @@ public class TenmoController {
     @RequestMapping(path="/transfers", method = RequestMethod.POST)
     public Transfer createTransfer(@Valid @RequestBody Transfer transfer, Principal principal) {
 
-        transfer.setSenderUsername(principal.getName());
-
-
         // validate that the sender has enough money
         boolean canTransfer = dao.validateSendTransfer(transfer);
 
         // call dao to insert in to transfer table no matter what the transfer type is
         if (!canTransfer) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money in the account to send.");
-//            return transfer;
         }
 
-//        transfer = dao.createTransfer(transfer);
+        transfer = dao.createTransfer(transfer);
 
         // if the type is "send" update accounts' balances immediately
-        if (transfer.getType().equalsIgnoreCase("Send")) {
-            dao.updateAccountBalances(transfer);
-        }
+//        if (transfer.getType().equalsIgnoreCase("Send")) {
+//            dao.updateAccountBalances(transfer);
+//        }
 
 
         return transfer;

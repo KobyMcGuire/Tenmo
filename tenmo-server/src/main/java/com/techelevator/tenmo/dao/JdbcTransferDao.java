@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,63 @@ public class JdbcTransferDao implements TransferDao{
 
     @Override
     public boolean validateSendTransfer(Transfer transfer) {
+        BigDecimal balance = new BigDecimal("0");
+        String sql = "SELECT balance FROM account WHERE user_id = ?";
+        try {
+            SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transfer.getSenderId());
+            if (result.next()) {
+                balance = result.getBigDecimal("balance");
+            }
+            if (balance.compareTo(transfer.getAmount()) >= 0){
+                return true;
+            }
+        } catch (Exception e) {
+            throw new DaoException("Was not able to get account balance", e);
+        }
         return false;
+    }
+
+    @Override
+    public Transfer createTransfer(Transfer transfer) {
+
+        String accountSQL = "SELECT account_id FROM account WHERE user_id = ?";
+        String transferTypeSQL = "SELECT transfer_type_id FROM transfer_type WHERE transfer_type_desc ILIKE ?";
+        String transferStatusSQL = "SELECT transfer_status_id FROM transfer_status WHERE transfer_status_desc ILIKE ?";
+        String createSQL = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+                "VALUES (?, ?, ?, ?, ?) RETURNING transfer_id";
+
+        int senderAccountID = 0;
+        int recipientAccountID = 0;
+        int transferTypeID = 0;
+        int transferStatusID = 0;
+        try {
+            SqlRowSet result = jdbcTemplate.queryForRowSet(accountSQL, transfer.getSenderId());
+            if (result.next()) {
+                senderAccountID = result.getInt("account_id");
+                if (senderAccountID == 0) { throw new DaoException("From Account Id did not get set");}
+            }
+            result = jdbcTemplate.queryForRowSet(accountSQL, transfer.getRecipientId());
+            if (result.next()) {
+                recipientAccountID = result.getInt("account_id");
+                if (recipientAccountID == 0) { throw new DaoException("To Account Id did not get set");}
+            }
+            result = jdbcTemplate.queryForRowSet(transferTypeSQL, transfer.getType());
+            if (result.next()){
+                transferTypeID = result.getInt("transfer_type_id");
+                if (transferTypeID == 0) { throw new DaoException("Transfer Type Id did not get set");}
+            }
+            result = jdbcTemplate.queryForRowSet(transferStatusSQL, transfer.getStatus());
+            if (result.next()){
+                transferStatusID = result.getInt("transfer_status_id");
+                if (transferStatusID == 0) { throw new DaoException("Transfer Status Id did not get set");}
+            }
+
+            int transferID = jdbcTemplate.queryForObject(createSQL, int.class, transferTypeID, transferStatusID, senderAccountID, recipientAccountID, transfer.getAmount());
+            transfer.setTransferId(transferID);
+        } catch (Exception e) {
+            throw new DaoException("There was an error.", e);
+        }
+        return transfer;
     }
 
     @Override

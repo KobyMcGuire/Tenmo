@@ -1,13 +1,13 @@
 package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.util.BasicLogger;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.math.BigDecimal;
 
 public class TenmoService {
 
@@ -48,7 +48,26 @@ public class TenmoService {
     }
 
     //TODO - CREATE TRANSFER (bundle userId into object)
+    public Transfer createTransfer(Transfer transfer) {
 
+        try {
+            ResponseEntity<Transfer> response = restTemplate.exchange(API_BASE_URL + "transfers", HttpMethod.POST, makeTransferEntity(transfer), Transfer.class);
+            transfer = response.getBody();
+        }
+
+        catch (Exception e) {
+            BasicLogger.log(e.getMessage());
+        }
+
+        return transfer;
+    }
+
+    private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(authToken);
+        return new HttpEntity<>(transfer, headers);
+    }
 
     private HttpEntity<Void> makeAuthEntity() {
         HttpHeaders headers = new HttpHeaders();

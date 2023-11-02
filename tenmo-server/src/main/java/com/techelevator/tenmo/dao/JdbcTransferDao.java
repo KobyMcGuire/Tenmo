@@ -103,6 +103,59 @@ public class JdbcTransferDao implements TransferDao{
     @Override
     public void updateAccountBalances(Transfer transfer) {
 
+          // Transaction ??
+//        // Begin Transaction SQL
+//        String beingTransactionSql = "BEGIN TRANSACTION";
+//        // Rollback SQL
+//        String rollbackSql = "ROLLBACK";
+//        // Commit SQL
+//        String commitSql = "COMMIT";
+
+        //  Grabbing balance SQL
+        String grabBalanceSql = "SELECT balance " +
+                     "FROM account " +
+                     "WHERE user_id = ?";
+
+        // Updating account balance SQL
+        String updateBalanceSql = "UPDATE account SET balance = ? WHERE user_id = ?";
+
+
+        try {
+            BigDecimal senderBalance = new BigDecimal(0);
+            BigDecimal recipientBalance = new BigDecimal(0);
+
+
+
+            // Sender
+            SqlRowSet result = jdbcTemplate.queryForRowSet(grabBalanceSql, transfer.getSenderId());
+            if (result.next()) {
+                senderBalance = result.getBigDecimal("balance");
+                senderBalance = senderBalance.subtract(transfer.getAmount());
+                int rowsAffected = jdbcTemplate.update(updateBalanceSql, senderBalance, transfer.getSenderId());
+
+                // Exception handling
+                if (rowsAffected == 0) {
+                    throw new DaoException("No rows were updated for the sender.");
+                }
+            }
+
+            // Recipient
+            result = jdbcTemplate.queryForRowSet(grabBalanceSql, transfer.getRecipientId());
+            if (result.next()) {
+                recipientBalance = result.getBigDecimal("balance");
+                recipientBalance = recipientBalance.add(transfer.getAmount());
+                int rowsAffected = jdbcTemplate.update(updateBalanceSql, recipientBalance, transfer.getRecipientId());
+
+                // Exception handling
+                if (rowsAffected == 0) {
+                    throw new DaoException("No rows were updated for the recipient.");
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new DaoException("There was an error with updating the balances.", e);
+        }
+
     }
 
     @Override

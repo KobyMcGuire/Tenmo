@@ -1,13 +1,11 @@
 package com.techelevator.tenmo;
 
-import com.techelevator.tenmo.model.Account;
-import com.techelevator.tenmo.model.AuthenticatedUser;
-import com.techelevator.tenmo.model.User;
-import com.techelevator.tenmo.model.UserCredentials;
+import com.techelevator.tenmo.model.*;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
 import com.techelevator.tenmo.services.TenmoService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class App {
@@ -109,15 +107,45 @@ public class App {
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
+        // Print list of users
         User[] users = tenmoService.retrieveListOfUsers();
         consoleService.printListOfUsers(users, currentUser.getUser().getId());
-		
+
+        // Prompt user for recipient user Id
+        int recipientUserId = consoleService.promptForInt("Enter ID of user you are sending to (0 to cancel): ");
+        if (recipientUserId == 0) {
+            return;
+        }
+
+        // Prompt user for amount
+        BigDecimal amount = consoleService.promptForBigDecimal("Enter amount: ");
+
+        // Bundle transfer before sending it through service method
+        Transfer transfer = bundleTransfer(recipientUserId, amount, "Send");
+
+        // Call service
+        transfer = tenmoService.createTransfer(transfer);
 	}
 
 	private void requestBucks() {
 		// TODO Auto-generated method stub
 		
 	}
+
+    private Transfer bundleTransfer(int recipientUserId, BigDecimal amount, String type) {
+        Transfer transfer = new Transfer();
+
+        if (type.equalsIgnoreCase("Send")) {
+            transfer.setSenderId(currentUser.getUser().getId());
+            transfer.setRecipientId(recipientUserId);
+            transfer.setAmount(amount);
+            transfer.setType(type);
+            transfer.setStatus("Approved");
+        }
+
+        // TODO Request type
+
+        return transfer;
+    }
 
 }

@@ -46,6 +46,10 @@ public class TenmoController {
     @RequestMapping(path="/transfers", method = RequestMethod.POST)
     public Transfer createTransfer(@Valid @RequestBody Transfer transfer, Principal principal) {
 
+        if (transfer.getRecipientId() == transfer.getSenderId()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You tried to send money to yourself :(.");
+        }
+
         // validate that the sender has enough money
         boolean canTransfer = dao.validateSendTransfer(transfer);
 
@@ -57,9 +61,9 @@ public class TenmoController {
         transfer = dao.createTransfer(transfer);
 
         // if the type is "send" update accounts' balances immediately
-//        if (transfer.getType().equalsIgnoreCase("Send")) {
-//            dao.updateAccountBalances(transfer);
-//        }
+        if (transfer.getType().equalsIgnoreCase("Send")) {
+            dao.updateAccountBalances(transfer);
+        }
 
 
         return transfer;

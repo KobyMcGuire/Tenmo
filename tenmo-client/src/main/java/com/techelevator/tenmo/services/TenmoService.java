@@ -49,7 +49,7 @@ public class TenmoService {
         return users;
     }
 
-    //TODO - CREATE TRANSFER (bundle userId into object)
+
     public Transfer createTransfer(Transfer transfer) {
 
         try {
@@ -76,9 +76,30 @@ public class TenmoService {
         return transfers;
     }
 
+    public Transfer[] retrieveListOfPendingTransfers(int userId){
+        Transfer[] transfers = null;
+        try {
+            ResponseEntity<Transfer[]> response = restTemplate.exchange(API_BASE_URL + "transfers?userId=" + userId + "&wantsPending=true", HttpMethod.GET, makeAuthEntity(), Transfer[].class);
+            transfers = response.getBody();
+
+        } catch(Exception e) {
+            BasicLogger.log(e.getMessage());
+        }
+        return transfers;
+    }
+
     public Transfer retrieveTransferById(int transferId){
-        // TODO CALL SERVER SIDE
-        return new Transfer();
+        Transfer transfer = null;
+
+        try {
+            ResponseEntity<Transfer> response = restTemplate.exchange(API_BASE_URL + "transfers/" + transferId, HttpMethod.GET, makeAuthEntity(), Transfer.class);
+            transfer = response.getBody();
+        }
+        catch(Exception e) {
+            BasicLogger.log(e.getMessage());
+        }
+
+        return transfer;
     }
 
     private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {

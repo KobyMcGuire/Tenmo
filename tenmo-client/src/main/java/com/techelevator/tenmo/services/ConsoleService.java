@@ -114,6 +114,35 @@ public class ConsoleService {
         System.out.println("---------");
     }
 
+    public void printListOfPendingTransfers(Transfer[] transfers){
+        System.out.println("-------------------------------------------");
+        System.out.println("Pending Transfers");
+        System.out.printf("%-10s %-15s %-10s", "ID", "To", "Amount");
+        System.out.println();
+        System.out.println("-------------------------------------------");
+
+        // loop through array
+        for(Transfer transfer : transfers) {
+            System.out.printf("%-10s %-15s %-10s", transfer.getTransferId(), transfer.getRecipientUsername(), "$ " + transfer.getAmount());
+            System.out.println();
+        }
+
+        System.out.println("---------");
+    }
+
+    public void printTransactionDetails(Transfer transfer) {
+        System.out.println("-------------------------------------------");
+        System.out.println("Transfer Details");
+        System.out.println("-------------------------------------------");
+
+        System.out.println("Id: " + transfer.getTransferId());
+        System.out.println("From: " + transfer.getSenderUsername());
+        System.out.println("To: " + transfer.getRecipientUsername());
+        System.out.println("Type: " + transfer.getType());
+        System.out.println("Status: "+ transfer.getStatus());
+        System.out.println("Amount: $" + transfer.getAmount());
+    }
+
     public BigDecimal promptForBigDecimal(String prompt) {
         System.out.print(prompt);
         while (true) {

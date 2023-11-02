@@ -113,12 +113,13 @@ public class App {
 	}
     private void viewTransferById(int transferId){
         Transfer transfer = tenmoService.retrieveTransferById(transferId);
-        // pass transfer to consol to print
+        // pass transfer to console to print
+        consoleService.printTransactionDetails(transfer);
     }
 
 	private void viewPendingRequests() {
-		// TODO Auto-generated method stub
-		
+        Transfer[] transfers = tenmoService.retrieveListOfPendingTransfers(currentUser.getUser().getId());
+        consoleService.printListOfPendingTransfers(transfers);
 	}
 
 	private void sendBucks() {
@@ -143,22 +144,43 @@ public class App {
 	}
 
 	private void requestBucks() {
-		// TODO Auto-generated method stub
-		
-	}
+        // Print list of users to pick from
+        consoleService.printListOfUsers(tenmoService.retrieveListOfUsers(), currentUser.getUser().getId());
 
-    private Transfer bundleTransfer(int recipientUserId, BigDecimal amount, String type) {
+        // Grab user input for their chosen user
+        int requesteeId = consoleService.promptForInt("Enter ID of user you are requesting from (0 to cancel): ");
+        if (requesteeId == 0) {
+            return;
+        }
+
+        // Take in the user input for the amount
+        BigDecimal amount = consoleService.promptForBigDecimal("Enter Amount: ");
+
+        // Bundle the transfer
+        Transfer transfer = bundleTransfer(requesteeId, amount, "Request");
+
+        // Call Tenmo Service to create the transfer
+        tenmoService.createTransfer(transfer);
+    }
+
+    private Transfer bundleTransfer(int userChoiceId, BigDecimal amount, String type) {
         Transfer transfer = new Transfer();
+        int currentUserId = currentUser.getUser().getId();
 
         if (type.equalsIgnoreCase("Send")) {
-            transfer.setSenderId(currentUser.getUser().getId());
-            transfer.setRecipientId(recipientUserId);
+            transfer.setSenderId(currentUserId);
+            transfer.setRecipientId(userChoiceId);
             transfer.setAmount(amount);
             transfer.setType(type);
             transfer.setStatus("Approved");
         }
-
-        // TODO Request type
+        else if (type.equalsIgnoreCase("Request")) {
+            transfer.setSenderId(userChoiceId);
+            transfer.setRecipientId(currentUserId);
+            transfer.setAmount(amount);
+            transfer.setType(type);
+            transfer.setStatus("Pending");
+        }
 
         return transfer;
     }

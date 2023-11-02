@@ -124,8 +124,6 @@ public class JdbcTransferDao implements TransferDao{
             BigDecimal senderBalance = new BigDecimal(0);
             BigDecimal recipientBalance = new BigDecimal(0);
 
-
-
             // Sender
             SqlRowSet result = jdbcTemplate.queryForRowSet(grabBalanceSql, transfer.getSenderId());
             if (result.next()) {
@@ -201,6 +199,34 @@ public class JdbcTransferDao implements TransferDao{
         }
         return transfers;
     }
+
+    public List<Transfer> retrieveListOfPendingTransfers(int userId) {
+        List<Transfer> transfers = new ArrayList<>();
+        String sql = "SELECT t.transfer_id, tt.transfer_type_desc, ts.transfer_status_desc, t.amount, " +
+                "tuf.username AS sender_username, tut.username AS recipient_username, " +
+                "af.user_id AS sender_id, at.user_id AS recipient_id " +
+                "FROM transfer AS t " +
+                "JOIN transfer_type AS tt ON t.transfer_type_id = tt.transfer_type_id " +
+                "JOIN transfer_status AS ts ON t.transfer_status_id = ts.transfer_status_id " +
+                "JOIN account AS af ON t.account_from = af.account_id " +
+                "JOIN account AS at ON t.account_to = at.account_id " +
+                "JOIN tenmo_user AS tuf ON af.user_id = tuf.user_id " +
+                "JOIN tenmo_user AS tut ON at.user_id = tut.user_id " +
+                "WHERE af.user_id = ? AND ts.transfer_status_desc ILIKE 'Pending'";
+
+        try {
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);
+            while (results.next()) {
+                transfers.add(mapRowToTransfer(results));
+            }
+        }
+        catch (Exception e) {
+            throw  new DaoException("There was a problem with fetching the pending transactions.", e);
+        }
+
+        return transfers;
+    }
+
     public Transfer retrieveTransferById(int transferId){
         Transfer transfer = null;
         String sql = "SELECT t.transfer_id, tt.transfer_type_desc, ts.transfer_status_desc, t.amount, " +

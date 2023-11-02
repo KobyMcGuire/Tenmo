@@ -46,35 +46,49 @@ public class TenmoController {
     @RequestMapping(path="/transfers", method = RequestMethod.POST)
     public Transfer createTransfer(@Valid @RequestBody Transfer transfer, Principal principal) {
 
+        // Checking that the user is not targeting themselves for the request or send
         if (transfer.getRecipientId() == transfer.getSenderId()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You tried to send money to yourself :(.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You tried to send or request money to / from yourself :(");
         }
 
-        // validate that the sender has enough money
-        boolean canTransfer = dao.validateSendTransfer(transfer);
-
-        // call dao to insert in to transfer table no matter what the transfer type is
-        if (!canTransfer) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money in the account to send.");
-        }
-
-        transfer = dao.createTransfer(transfer);
-
-        // if the type is "send" update accounts' balances immediately
+        // Path for sending money
         if (transfer.getType().equalsIgnoreCase("Send")) {
+
+            // Validate that the sender has enough money
+            boolean canTransfer = dao.validateSendTransfer(transfer);
+            // Throw exception if the user does not have enough money
+            if (!canTransfer) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money in the account to send.");
+            }
+
+            // Update both accounts' balances
             dao.updateAccountBalances(transfer);
         }
+
+
+
+        // Insert into transfer table no matter what the type is
+        transfer = dao.createTransfer(transfer);
 
 
         return transfer;
     }
 
     @RequestMapping(path = "transfers", method = RequestMethod.GET)
-    public List<Transfer> retrieveListOfTransfers(@RequestParam int userId){
-         List<Transfer> transfers =  dao.retrieveListOfTransfers(userId);
-         if (transfers.isEmpty()) {
-             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get list of transfers.");
-         }
+    public List<Transfer> retrieveListOfTransfers(@RequestParam int userId, @RequestParam(required = false) boolean wantsPending){
+        List<Transfer> transfers = new ArrayList<>();
+
+        if (!wantsPending) {
+            transfers =  dao.retrieveListOfTransfers(userId);
+        }
+        else {
+            transfers = dao.retrieveListOfPendingTransfers(userId);
+        }
+
+        if (transfers.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get list of transfers.");
+        }
+
          return transfers;
     }
 

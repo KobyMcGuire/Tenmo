@@ -22,6 +22,21 @@ public class Transfer {
     private String senderUsername;
     private String recipientUsername;
 
+    public Transfer(){
+    }
+    // FOR TESTING:
+        // WITH USERNAMES:
+    public Transfer(int transferId, int senderId, int recipientId, BigDecimal amount, String type, String status, String senderUsername, String recipientUsername){
+        this.transferId = transferId;
+        this.senderId = senderId;
+        this.recipientId = recipientId;
+        this.amount = amount;
+        this.type = type;
+        this.status = status;
+        this.senderUsername = senderUsername;
+        this.recipientUsername = recipientUsername;
+    }
+ 
     public int getTransferId() {
         return transferId;
     }

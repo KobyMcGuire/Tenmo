@@ -8,6 +8,8 @@ import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TenmoService {
 
@@ -60,6 +62,23 @@ public class TenmoService {
         }
 
         return transfer;
+    }
+
+    public Transfer[] retrieveListOfTransfers(int userId){
+        Transfer[] transfers = null;
+        try {
+            ResponseEntity<Transfer[]> response = restTemplate.exchange(API_BASE_URL + "transfers?userId=" + userId, HttpMethod.GET, makeAuthEntity(), Transfer[].class);
+            transfers = response.getBody();
+
+        } catch(Exception e) {
+            BasicLogger.log(e.getMessage());
+        }
+        return transfers;
+    }
+
+    public Transfer retrieveTransferById(int transferId){
+        // TODO CALL SERVER SIDE
+        return new Transfer();
     }
 
     private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {

@@ -18,6 +18,9 @@ public interface TransferDao {
 
     List<User> retrieveListOfUsers();
 
+    List<Transfer> retrieveListOfTransfers(int userId);
+    Transfer retrieveTransferById(int transferId);
+
 
 
 }

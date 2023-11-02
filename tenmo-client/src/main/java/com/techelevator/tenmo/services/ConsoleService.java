@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.services;
 
 
+import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
 
@@ -91,6 +92,26 @@ public class ConsoleService {
                 System.out.println("Please enter a number.");
             }
         }
+    }
+    public void printListOfTransfers(Transfer[] transfers, String username){
+        System.out.println("-------------------------------------------");
+        System.out.println("Transfers");
+        System.out.printf("%-10s %-15s %-10s", "ID", "From/To", "Amount");
+        System.out.println();
+        System.out.println("-------------------------------------------");
+
+        // loop through array
+        for(Transfer transfer : transfers) {
+            if (!transfer.getSenderUsername().equals(username)){
+                System.out.printf("%-10s %-15s %-10s", transfer.getTransferId(), "From: " + transfer.getSenderUsername(), "$" + transfer.getAmount());
+                System.out.println();
+            } else {
+                System.out.printf("%-10s %-15s %-10s", transfer.getTransferId(), "To: " + transfer.getRecipientUsername(), "$" + transfer.getAmount());
+                System.out.println();
+            }
+        }
+
+        System.out.println("---------");
     }
 
     public BigDecimal promptForBigDecimal(String prompt) {

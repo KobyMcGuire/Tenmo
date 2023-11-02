@@ -177,6 +177,54 @@ public class JdbcTransferDao implements TransferDao{
         return users;
     }
 
+    @Override
+    public List<Transfer> retrieveListOfTransfers(int userId) {
+        List<Transfer> transfers = new ArrayList<>();
+        String sql = "SELECT t.transfer_id, tt.transfer_type_desc, ts.transfer_status_desc, t.amount, " +
+                "tuf.username AS sender_username, tut.username AS recipient_username, " +
+                "af.user_id AS sender_id, at.user_id AS recipient_id " +
+                "FROM transfer AS t " +
+                "JOIN transfer_type AS tt ON t.transfer_type_id = tt.transfer_type_id " +
+                "JOIN transfer_status AS ts ON t.transfer_status_id = ts.transfer_status_id " +
+                "JOIN account AS af ON t.account_from = af.account_id " +
+                "JOIN account AS at ON t.account_to = at.account_id " +
+                "JOIN tenmo_user AS tuf ON af.user_id = tuf.user_id " +
+                "JOIN tenmo_user AS tut ON at.user_id = tut.user_id " +
+                "WHERE af.user_id = ? OR at.user_id = ?";
+        try {
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId, userId);
+            while (results.next()){
+                transfers.add(mapRowToTransfer(results));
+            }
+        } catch (Exception e ) {
+            throw new DaoException("There was an error getting transfers.", e);
+        }
+        return transfers;
+    }
+    public Transfer retrieveTransferById(int transferId){
+        Transfer transfer = null;
+        String sql = "SELECT t.transfer_id, tt.transfer_type_desc, ts.transfer_status_desc, t.amount, " +
+                "tuf.username AS sender_username, tut.username AS recipient_username, " +
+                "af.user_id AS sender_id, at.user_id AS recipient_id " +
+                "FROM transfer AS t " +
+                "JOIN transfer_type AS tt ON t.transfer_type_id = tt.transfer_type_id " +
+                "JOIN transfer_status AS ts ON t.transfer_status_id = ts.transfer_status_id " +
+                "JOIN account AS af ON t.account_from = af.account_id " +
+                "JOIN account AS at ON t.account_to = at.account_id " +
+                "JOIN tenmo_user AS tuf ON af.user_id = tuf.user_id " +
+                "JOIN tenmo_user AS tut ON at.user_id = tut.user_id " +
+                "WHERE t.transfer_id = ?";
+        try {
+            SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
+            if (result.next()) {
+                transfer = mapRowToTransfer(result);
+            }
+        } catch (Exception e) {
+            throw new DaoException("There was an error locating specific transfer.", e);
+        }
+        return transfer;
+    }
+
     private Account mapRowToAccount(SqlRowSet rowSet){
         Account account = new Account();
         account.setBalance(rowSet.getBigDecimal("balance"));
@@ -188,5 +236,19 @@ public class JdbcTransferDao implements TransferDao{
         user.setId(rowSet.getInt("user_id"));
         user.setUsername(rowSet.getString("username"));
         return user;
+    }
+
+    private Transfer mapRowToTransfer(SqlRowSet rowSet){
+        Transfer transfer = new Transfer();
+        transfer.setTransferId(rowSet.getInt("transfer_id"));
+        transfer.setSenderUsername(rowSet.getString("sender_username"));
+        transfer.setSenderId(rowSet.getInt("sender_id"));
+        transfer.setRecipientId(rowSet.getInt("recipient_id"));
+        transfer.setRecipientUsername(rowSet.getString("recipient_username"));
+        transfer.setAmount(rowSet.getBigDecimal("amount"));
+        transfer.setType(rowSet.getString("transfer_type_desc"));
+        transfer.setStatus(rowSet.getString("transfer_status_desc"));
+
+        return transfer;
     }
 }

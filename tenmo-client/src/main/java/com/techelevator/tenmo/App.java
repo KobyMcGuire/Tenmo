@@ -97,9 +97,24 @@ public class App {
 	}
 
 	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
-		
+		Transfer[] transfers = tenmoService.retrieveListOfTransfers(currentUser.getUser().getId());
+        if (transfers == null){
+            consoleService.printErrorMessage();
+            return;
+        }
+        // pass list to console to print
+        consoleService.printListOfTransfers(transfers, currentUser.getUser().getUsername());
+        int userResponse = consoleService.promptForInt("Please enter transfer ID to view details (0 to cancel): ");
+        if (userResponse == 0){
+            return;
+        }
+        viewTransferById(userResponse);
+
 	}
+    private void viewTransferById(int transferId){
+        Transfer transfer = tenmoService.retrieveTransferById(transferId);
+        // pass transfer to consol to print
+    }
 
 	private void viewPendingRequests() {
 		// TODO Auto-generated method stub

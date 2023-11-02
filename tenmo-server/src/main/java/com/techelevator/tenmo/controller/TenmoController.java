@@ -69,4 +69,23 @@ public class TenmoController {
         return transfer;
     }
 
+    @RequestMapping(path = "transfers", method = RequestMethod.GET)
+    public List<Transfer> retrieveListOfTransfers(@RequestParam int userId){
+         List<Transfer> transfers =  dao.retrieveListOfTransfers(userId);
+         if (transfers.isEmpty()) {
+             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get list of transfers.");
+         }
+         return transfers;
+    }
+
+    @RequestMapping(path = "transfers/{id}", method = RequestMethod.GET)
+    public Transfer retrieveTransferById(@PathVariable("id") int transferId){
+        Transfer transfer = null;
+        transfer = dao.retrieveTransferById(transferId);
+        if (transfer == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate specific transfer.");
+        }
+        return transfer;
+    }
+
 }

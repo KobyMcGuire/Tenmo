@@ -76,8 +76,8 @@ INSERT INTO tenmo_user (username,password_hash,role) VALUES ('user2','user2','RO
 INSERT INTO tenmo_user (username,password_hash,role) VALUES ('user3','user3','ROLE_USER'); -- 1003
 
 INSERT INTO account (user_id,balance) VALUES (1001,1000.00); -- 2001
-INSERT INTO account (user_id,balance) VALUES (1002,1000.00); -- 2002
-INSERT INTO account (user_id,balance) VALUES (1003,1000.00); -- 2003
+INSERT INTO account (user_id,balance) VALUES (1002,2000.00); -- 2002
+INSERT INTO account (user_id,balance) VALUES (1003,3000.00); -- 2003
 
 INSERT INTO transfer (transfer_type_id,transfer_status_id,account_from,account_to,amount)
     VALUES (2,2,2001,2002,100.00); -- 3001
@@ -85,6 +85,8 @@ INSERT INTO transfer (transfer_type_id,transfer_status_id,account_from,account_t
     VALUES (1,1,2001,2002,200.00); -- 3002 // Request/Pending (test for Approved)
 INSERT INTO transfer (transfer_type_id,transfer_status_id,account_from,account_to,amount)
     VALUES (1,1,2002,2003,200.00); -- 3003 // Request/Pending (test for Rejected)
+INSERT INTO transfer (transfer_type_id,transfer_status_id,account_from,account_to,amount)
+    VALUES (2,2,2001,2002,1000000.00); -- 3004
 
 
 

@@ -5,6 +5,7 @@ import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.util.BasicLogger;
 import org.springframework.http.*;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -104,7 +105,7 @@ public class TenmoService {
 
     public void updateTransferById(int transferId, String status){
         try{
-            // send transfer ID and status to Server-Side
+            ResponseEntity<Void> response = restTemplate.exchange(API_BASE_URL + "transfers/" + transferId + "?status=" + status, HttpMethod.PUT, makeAuthEntity(), Void.class);
         } catch (Exception e) {
             BasicLogger.log(e.getMessage());
         }

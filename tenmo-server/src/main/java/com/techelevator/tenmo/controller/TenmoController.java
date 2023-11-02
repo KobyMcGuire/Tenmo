@@ -104,10 +104,10 @@ public class TenmoController {
 
     @RequestMapping(path = "transfers/{id}", method = RequestMethod.PUT)
     public void updateTransferById(@PathVariable("id") int transferId, @RequestParam String status){
-        // If status is Approved
+        Transfer transfer = dao.retrieveTransferById(transferId);
+        // IF APPROVED -- Validate the sender's account balance, update both balances, and update transfer in database
         if (status.equals("Approved")) {
             // Check balance
-            Transfer transfer = dao.retrieveTransferById(transferId);
             boolean canTransfer = dao.validateTransfer(transfer);
             // Throw exception if the user does not have enough money
             if (!canTransfer) {
@@ -115,13 +115,19 @@ public class TenmoController {
             }
             dao.updateAccountBalances(transfer);
             transfer.setStatus("Approved");
-            int rowsAffected = dao.updateTransfer(transfer);
+            int rowsAffected = dao.updateTransferStatus(transfer);
+            if (rowsAffected == 0) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate transfer in database,.");
+            }
+            // IF REJECTED -- Only update the transfer's status field in the database:
+        } else if (status.equals("Rejected")){
+            transfer.setStatus("Rejected");
+            int rowsAffected = dao.updateTransferStatus(transfer);
             if (rowsAffected == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate transfer in database,.");
             }
         }
-        //if status is Rejected
-            // update transfer status on table
+
     }
 
 }

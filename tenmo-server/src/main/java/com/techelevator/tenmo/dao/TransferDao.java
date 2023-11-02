@@ -24,7 +24,7 @@ public interface TransferDao {
 
     Transfer retrieveTransferById(int transferId);
 
-    int updateTransfer(Transfer transfer);
+    int updateTransferStatus(Transfer transfer);
 
 
 

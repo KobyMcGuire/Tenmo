@@ -115,6 +115,11 @@ public class ConsoleService {
     }
 
     public void printListOfPendingTransfers(Transfer[] transfers){
+        if (transfers == null) {
+            System.out.println("No Pending Transfers at this time.");
+            return;
+        }
+
         System.out.println("-------------------------------------------");
         System.out.println("Pending Transfers");
         System.out.printf("%-10s %-15s %-10s", "ID", "To", "Amount");

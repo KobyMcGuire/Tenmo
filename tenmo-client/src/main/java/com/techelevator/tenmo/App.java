@@ -91,7 +91,6 @@ public class App {
     }
 
 	private void viewCurrentBalance() {
-		// TODO Auto-generated method stub
         Account account = tenmoService.retrieveAccountBalance();
         consoleService.printCurrentBalance(account.getBalance());
 	}
@@ -120,6 +119,22 @@ public class App {
 	private void viewPendingRequests() {
         Transfer[] transfers = tenmoService.retrieveListOfPendingTransfers(currentUser.getUser().getId());
         consoleService.printListOfPendingTransfers(transfers);
+        int transferId = consoleService.promptForInt("Please enter transfer ID to approve/reject (0 to cancel): ");
+        if (transferId == 0) {
+            return;
+        }
+        consoleService.printApproveRejectMenu();
+        int userChoice = consoleService.promptForInt("Please choose an option: ");
+        if (userChoice == 0) {
+            return;
+        } else if (userChoice == 1){
+            tenmoService.updateTransferById(transferId, "Approved");
+        } else if (userChoice == 2) {
+            tenmoService.updateTransferById(transferId, "Rejected");
+        } else {
+            consoleService.printErrorMessage();
+            return;
+        }
 	}
 
 	private void sendBucks() {

@@ -129,6 +129,13 @@ public class ConsoleService {
 
         System.out.println("---------");
     }
+    public void printApproveRejectMenu() {
+        System.out.println();
+        System.out.println("1: Approve");
+        System.out.println("2: Reject");
+        System.out.println("0: Don't approve or reject");
+        System.out.println("---------");
+    }
 
     public void printTransactionDetails(Transfer transfer) {
         System.out.println("-------------------------------------------");

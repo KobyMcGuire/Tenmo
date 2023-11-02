@@ -40,7 +40,7 @@ public class JdbcTransferDao implements TransferDao{
     }
 
     @Override
-    public boolean validateSendTransfer(Transfer transfer) {
+    public boolean validateTransfer(Transfer transfer) {
         BigDecimal balance = new BigDecimal("0");
         String sql = "SELECT balance FROM account WHERE user_id = ?";
         try {
@@ -249,6 +249,22 @@ public class JdbcTransferDao implements TransferDao{
             throw new DaoException("There was an error locating specific transfer.", e);
         }
         return transfer;
+    }
+
+    public int updateTransfer(Transfer transfer){
+        int rowsAffected = 0;
+        String sql = "UPDATE transfer " +
+                "SET transfer_status_id = (SELECT transfer_status_id FROM transfer_status WHERE transfer_status_desc ILIKE ?) " +
+                "WHERE transfer_id = ?";
+        try {
+            rowsAffected = jdbcTemplate.update(sql, transfer.getStatus(), transfer.getTransferId());
+            if (rowsAffected == 0) {
+                throw new DaoException("No rows were updated.");
+            }
+        } catch (Exception e) {
+            throw new DaoException("There was an error updating the transfer.", e);
+        }
+        return rowsAffected;
     }
 
     private Account mapRowToAccount(SqlRowSet rowSet){

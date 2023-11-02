@@ -55,7 +55,7 @@ public class TenmoController {
         if (transfer.getType().equalsIgnoreCase("Send")) {
 
             // Validate that the sender has enough money
-            boolean canTransfer = dao.validateSendTransfer(transfer);
+            boolean canTransfer = dao.validateTransfer(transfer);
             // Throw exception if the user does not have enough money
             if (!canTransfer) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money in the account to send.");
@@ -100,6 +100,28 @@ public class TenmoController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate specific transfer.");
         }
         return transfer;
+    }
+
+    @RequestMapping(path = "transfers/{id}", method = RequestMethod.PUT)
+    public void updateTransferById(@PathVariable("id") int transferId, @RequestParam String status){
+        // If status is Approved
+        if (status.equals("Approved")) {
+            // Check balance
+            Transfer transfer = dao.retrieveTransferById(transferId);
+            boolean canTransfer = dao.validateTransfer(transfer);
+            // Throw exception if the user does not have enough money
+            if (!canTransfer) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money in the account to send.");
+            }
+            dao.updateAccountBalances(transfer);
+            transfer.setStatus("Approved");
+            int rowsAffected = dao.updateTransfer(transfer);
+            if (rowsAffected == 0) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate transfer in database,.");
+            }
+        }
+        //if status is Rejected
+            // update transfer status on table
     }
 
 }

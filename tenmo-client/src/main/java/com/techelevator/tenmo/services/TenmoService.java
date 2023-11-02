@@ -102,6 +102,14 @@ public class TenmoService {
         return transfer;
     }
 
+    public void updateTransferById(int transferId, String status){
+        try{
+            // send transfer ID and status to Server-Side
+        } catch (Exception e) {
+            BasicLogger.log(e.getMessage());
+        }
+    }
+
     private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

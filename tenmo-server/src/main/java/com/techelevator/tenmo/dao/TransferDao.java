@@ -10,7 +10,7 @@ public interface TransferDao {
 
     Account retrieveAccountBalance(String username);
 
-    boolean validateSendTransfer(Transfer transfer);
+    boolean validateTransfer(Transfer transfer);
 
     Transfer createTransfer(Transfer transfer);
 
@@ -23,6 +23,8 @@ public interface TransferDao {
     List<Transfer> retrieveListOfPendingTransfers(int userId);
 
     Transfer retrieveTransferById(int transferId);
+
+    int updateTransfer(Transfer transfer);
 
 
 

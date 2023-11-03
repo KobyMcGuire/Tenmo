@@ -94,6 +94,10 @@ public class ConsoleService {
         }
     }
     public void printListOfTransfers(Transfer[] transfers, String username){
+        if (transfers == null) {
+            System.out.println("No Transfers at this time.");
+            return;
+        }
         System.out.println("-------------------------------------------");
         System.out.println("Transfers");
         System.out.printf("%-10s %-15s %-10s", "ID", "From/To", "Amount");
@@ -115,11 +119,6 @@ public class ConsoleService {
     }
 
     public void printListOfPendingTransfers(Transfer[] transfers){
-        if (transfers == null) {
-            System.out.println("No Pending Transfers at this time.");
-            return;
-        }
-
         System.out.println("-------------------------------------------");
         System.out.println("Pending Transfers");
         System.out.printf("%-10s %-15s %-10s", "ID", "To", "Amount");
@@ -143,6 +142,7 @@ public class ConsoleService {
     }
 
     public void printTransactionDetails(Transfer transfer) {
+
         System.out.println("-------------------------------------------");
         System.out.println("Transfer Details");
         System.out.println("-------------------------------------------");
@@ -173,6 +173,10 @@ public class ConsoleService {
 
     public void printErrorMessage() {
         System.out.println("An error occurred. Check the log for details.");
+    }
+
+    public void printValidationMessage(String message){
+        System.out.println(message);
     }
 
 }

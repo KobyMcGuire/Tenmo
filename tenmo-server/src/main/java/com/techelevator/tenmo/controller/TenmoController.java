@@ -62,7 +62,10 @@ public class TenmoController {
             }
 
             // Update both accounts' balances
-            dao.updateAccountBalances(transfer);
+            boolean updateSuccessful = dao.updateAccountBalances(transfer);
+            if (!updateSuccessful) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error occurred while updating balances.");
+            }
         }
 
 
@@ -103,7 +106,7 @@ public class TenmoController {
     }
 
     @RequestMapping(path = "transfers/{id}", method = RequestMethod.PUT)
-    public void updateTransferById(@PathVariable("id") int transferId, @RequestParam String status){
+    public boolean updateTransferById(@PathVariable("id") int transferId, @RequestParam String status){
         Transfer transfer = dao.retrieveTransferById(transferId);
         // IF APPROVED -- Validate the sender's account balance, update both balances, and update transfer in database
         if (status.equals("Approved")) {
@@ -119,6 +122,7 @@ public class TenmoController {
             if (rowsAffected == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate transfer in database,.");
             }
+            return true;
             // IF REJECTED -- Only update the transfer's status field in the database:
         } else if (status.equals("Rejected")){
             transfer.setStatus("Rejected");
@@ -126,8 +130,9 @@ public class TenmoController {
             if (rowsAffected == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate transfer in database,.");
             }
+            return true;
         }
-
+        return false;
     }
 
 }

@@ -14,7 +14,7 @@ public interface TransferDao {
 
     Transfer createTransfer(Transfer transfer);
 
-    void updateAccountBalances(Transfer transfer);
+    boolean updateAccountBalances(Transfer transfer);
 
     List<User> retrieveListOfUsers();
 

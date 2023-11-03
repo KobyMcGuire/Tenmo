@@ -103,12 +103,14 @@ public class TenmoService {
         return transfer;
     }
 
-    public void updateTransferById(int transferId, String status){
+    public boolean updateTransferById(int transferId, String status){
         try{
-            ResponseEntity<Void> response = restTemplate.exchange(API_BASE_URL + "transfers/" + transferId + "?status=" + status, HttpMethod.PUT, makeAuthEntity(), Void.class);
+            ResponseEntity<Boolean> response = restTemplate.exchange(API_BASE_URL + "transfers/" + transferId + "?status=" + status, HttpMethod.PUT, makeAuthEntity(), Boolean.class);
+            return response.getBody();
         } catch (Exception e) {
             BasicLogger.log(e.getMessage());
         }
+        return false;
     }
 
     private HttpEntity<Transfer> makeTransferEntity(Transfer transfer) {

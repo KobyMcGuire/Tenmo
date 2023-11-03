@@ -97,12 +97,12 @@ public class App {
 
 	private void viewTransferHistory() {
 		Transfer[] transfers = tenmoService.retrieveListOfTransfers(currentUser.getUser().getId());
-        if (transfers == null){
-            consoleService.printErrorMessage();
-            return;
-        }
+
         // pass list to console to print
         consoleService.printListOfTransfers(transfers, currentUser.getUser().getUsername());
+        if (transfers == null){
+            return;
+        }
         int userResponse = consoleService.promptForInt("Please enter transfer ID to view details (0 to cancel): ");
         if (userResponse == 0){
             return;
@@ -112,12 +112,20 @@ public class App {
 	}
     private void viewTransferById(int transferId){
         Transfer transfer = tenmoService.retrieveTransferById(transferId);
+        if (transfer == null) {
+            consoleService.printValidationMessage("Transfer not found.");
+            return;
+        }
         // pass transfer to console to print
         consoleService.printTransactionDetails(transfer);
     }
 
 	private void viewPendingRequests() {
         Transfer[] transfers = tenmoService.retrieveListOfPendingTransfers(currentUser.getUser().getId());
+        if (transfers == null) {
+            consoleService.printValidationMessage("No Pending Transfers at this time.");
+            return;
+        }
         consoleService.printListOfPendingTransfers(transfers);
         int transferId = consoleService.promptForInt("Please enter transfer ID to approve/reject (0 to cancel): ");
         if (transferId == 0) {
@@ -125,21 +133,31 @@ public class App {
         }
         consoleService.printApproveRejectMenu();
         int userChoice = consoleService.promptForInt("Please choose an option: ");
+        boolean wasSuccessful = false;
         if (userChoice == 0) {
             return;
         } else if (userChoice == 1){
-            tenmoService.updateTransferById(transferId, "Approved");
+            wasSuccessful = tenmoService.updateTransferById(transferId, "Approved");
         } else if (userChoice == 2) {
-            tenmoService.updateTransferById(transferId, "Rejected");
+            wasSuccessful = tenmoService.updateTransferById(transferId, "Rejected");
         } else {
-            consoleService.printErrorMessage();
+            consoleService.printValidationMessage("Not a valid option.");
             return;
+        }
+        if(wasSuccessful) {
+            consoleService.printValidationMessage("Transfer update was successful.");
+        } else {
+            consoleService.printValidationMessage("Transfer update was unsuccessful.");
         }
 	}
 
 	private void sendBucks() {
         // Print list of users
         User[] users = tenmoService.retrieveListOfUsers();
+        if(users == null) {
+            consoleService.printValidationMessage("No other users at this time.");
+            return;
+        }
         consoleService.printListOfUsers(users, currentUser.getUser().getId());
 
         // Prompt user for recipient user Id
@@ -156,11 +174,18 @@ public class App {
 
         // Call service
         transfer = tenmoService.createTransfer(transfer);
+
+        validateTransferWasPosted(transfer);
 	}
 
 	private void requestBucks() {
         // Print list of users to pick from
-        consoleService.printListOfUsers(tenmoService.retrieveListOfUsers(), currentUser.getUser().getId());
+        User[] users = tenmoService.retrieveListOfUsers();
+        if(users == null) {
+            consoleService.printValidationMessage("No other users at this time.");
+            return;
+        }
+        consoleService.printListOfUsers(users, currentUser.getUser().getId());
 
         // Grab user input for their chosen user
         int requesteeId = consoleService.promptForInt("Enter ID of user you are requesting from (0 to cancel): ");
@@ -175,7 +200,16 @@ public class App {
         Transfer transfer = bundleTransfer(requesteeId, amount, "Request");
 
         // Call Tenmo Service to create the transfer
-        tenmoService.createTransfer(transfer);
+        transfer = tenmoService.createTransfer(transfer);
+
+        validateTransferWasPosted(transfer);
+    }
+    private void validateTransferWasPosted(Transfer transfer){
+        if(transfer.getTransferId() > 0) {
+            consoleService.printValidationMessage("Transfer was posted.");
+        } else {
+            consoleService.printValidationMessage("Transfer was unable to be posted.");
+        }
     }
 
     private Transfer bundleTransfer(int userChoiceId, BigDecimal amount, String type) {

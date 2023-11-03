@@ -22,7 +22,7 @@ public class TenmoController {
     private TransferDao dao;
 
 
-    @RequestMapping(path = "accounts", method = RequestMethod.GET)
+    @RequestMapping(path = "/accounts", method = RequestMethod.GET)
     public Account retrieveAccountBalance(Principal principal){
         Account account = dao.retrieveAccountBalance(principal.getName());
         if (account == null) {
@@ -31,7 +31,7 @@ public class TenmoController {
         return account;
     }
 
-    @RequestMapping(path = "users", method = RequestMethod.GET)
+    @RequestMapping(path = "/users", method = RequestMethod.GET)
     public List<User> retrieveListOfUsers() {
         List<User> users = dao.retrieveListOfUsers();
 
@@ -71,7 +71,7 @@ public class TenmoController {
         return transfer;
     }
 
-    @RequestMapping(path = "transfers", method = RequestMethod.GET)
+    @RequestMapping(path = "/transfers", method = RequestMethod.GET)
     public List<Transfer> retrieveListOfTransfers(@RequestParam int userId, @RequestParam(required = false) boolean wantsPending){
         List<Transfer> transfers = new ArrayList<>();
 
@@ -89,7 +89,7 @@ public class TenmoController {
          return transfers;
     }
 
-    @RequestMapping(path = "transfers/{id}", method = RequestMethod.GET)
+    @RequestMapping(path = "/transfers/{id}", method = RequestMethod.GET)
     public Transfer retrieveTransferById(@PathVariable("id") int transferId){
         Transfer transfer = null;
         transfer = dao.retrieveTransferById(transferId);
@@ -101,7 +101,7 @@ public class TenmoController {
         return transfer;
     }
 
-    @RequestMapping(path = "transfers/{id}", method = RequestMethod.PUT)
+    @RequestMapping(path = "/transfers/{id}", method = RequestMethod.PUT)
     public boolean updateTransferById(@PathVariable("id") int transferId, @RequestParam String status){
         Transfer transfer = dao.retrieveTransferById(transferId);
 

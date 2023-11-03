@@ -136,7 +136,8 @@ public class JdbcTransferDao implements TransferDao{
     public List<User> retrieveListOfUsers() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT user_id, username " +
-                     "FROM tenmo_user";
+                     "FROM tenmo_user " +
+                     "ORDER BY user_id";
 
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
@@ -164,7 +165,8 @@ public class JdbcTransferDao implements TransferDao{
                 "JOIN account AS at ON t.account_to = at.account_id " +
                 "JOIN tenmo_user AS tuf ON af.user_id = tuf.user_id " +
                 "JOIN tenmo_user AS tut ON at.user_id = tut.user_id " +
-                "WHERE af.user_id = ? OR at.user_id = ?";
+                "WHERE af.user_id = ? OR at.user_id = ? " +
+                "ORDER BY t.transfer_id";
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId, userId);
             while (results.next()){
@@ -188,7 +190,8 @@ public class JdbcTransferDao implements TransferDao{
                 "JOIN account AS at ON t.account_to = at.account_id " +
                 "JOIN tenmo_user AS tuf ON af.user_id = tuf.user_id " +
                 "JOIN tenmo_user AS tut ON at.user_id = tut.user_id " +
-                "WHERE af.user_id = ? AND ts.transfer_status_desc ILIKE 'Pending'";
+                "WHERE af.user_id = ? AND ts.transfer_status_desc ILIKE 'Pending' " +
+                "ORDER BY t.transfer_id";
 
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);

@@ -53,10 +53,8 @@ public class TenmoController {
 
         // Path for sending money
         if (transfer.getType().equalsIgnoreCase("Send")) {
-
             // Validate that the sender has enough money
             boolean canTransfer = dao.validateTransfer(transfer);
-            // Throw exception if the user does not have enough money
             if (!canTransfer) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money in the account to send.");
             }
@@ -68,12 +66,8 @@ public class TenmoController {
             }
         }
 
-
-
         // Insert into transfer table no matter what the type is
         transfer = dao.createTransfer(transfer);
-
-
         return transfer;
     }
 
@@ -81,11 +75,11 @@ public class TenmoController {
     public List<Transfer> retrieveListOfTransfers(@RequestParam int userId, @RequestParam(required = false) boolean wantsPending){
         List<Transfer> transfers = new ArrayList<>();
 
-        if (!wantsPending) {
-            transfers =  dao.retrieveListOfTransfers(userId);
+        if (wantsPending) {
+            transfers =  dao.retrieveListOfPendingTransfers(userId);
         }
         else {
-            transfers = dao.retrieveListOfPendingTransfers(userId);
+            transfers = dao.retrieveListOfTransfers(userId);
         }
 
         if (transfers.isEmpty()) {
@@ -99,39 +93,52 @@ public class TenmoController {
     public Transfer retrieveTransferById(@PathVariable("id") int transferId){
         Transfer transfer = null;
         transfer = dao.retrieveTransferById(transferId);
+
         if (transfer == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate specific transfer.");
         }
+
         return transfer;
     }
 
     @RequestMapping(path = "transfers/{id}", method = RequestMethod.PUT)
     public boolean updateTransferById(@PathVariable("id") int transferId, @RequestParam String status){
         Transfer transfer = dao.retrieveTransferById(transferId);
-        // IF APPROVED -- Validate the sender's account balance, update both balances, and update transfer in database
+
         if (status.equals("Approved")) {
-            // Check balance
+            // Validate balance
             boolean canTransfer = dao.validateTransfer(transfer);
-            // Throw exception if the user does not have enough money
             if (!canTransfer) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough money in the account to send.");
             }
-            dao.updateAccountBalances(transfer);
+
+            // Updating both accounts' balances
+            boolean wasUpdated = dao.updateAccountBalances(transfer);
+            if (!wasUpdated) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account balances were not updated successfully.");
+            }
+
+            // Updating transfer status in database
             transfer.setStatus("Approved");
             int rowsAffected = dao.updateTransferStatus(transfer);
             if (rowsAffected == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate transfer in database,.");
             }
+
             return true;
-            // IF REJECTED -- Only update the transfer's status field in the database:
-        } else if (status.equals("Rejected")){
+        }
+
+        else if (status.equals("Rejected")) {
+            // Updating transfer status in database.
             transfer.setStatus("Rejected");
             int rowsAffected = dao.updateTransferStatus(transfer);
             if (rowsAffected == 0) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to locate transfer in database,.");
             }
+
             return true;
         }
+
         return false;
     }
 

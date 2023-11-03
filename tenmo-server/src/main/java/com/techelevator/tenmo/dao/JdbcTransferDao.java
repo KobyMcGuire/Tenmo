@@ -28,6 +28,7 @@ public class JdbcTransferDao implements TransferDao{
         String sql = "SELECT balance FROM account " +
                 "JOIN tenmo_user ON account.user_id = tenmo_user.user_id " +
                 "WHERE username ILIKE ?";
+
         try {
             SqlRowSet result = jdbcTemplate.queryForRowSet(sql, username);
             if (result.next()){
@@ -36,6 +37,7 @@ public class JdbcTransferDao implements TransferDao{
         } catch (Exception e){
             throw new DaoException("Unable to reach database or account was not found", e);
         }
+
         return account;
     }
 
@@ -43,6 +45,7 @@ public class JdbcTransferDao implements TransferDao{
     public boolean validateTransfer(Transfer transfer) {
         BigDecimal balance = new BigDecimal("0");
         String sql = "SELECT balance FROM account WHERE user_id = ?";
+
         try {
             SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transfer.getSenderId());
             if (result.next()) {
@@ -54,6 +57,7 @@ public class JdbcTransferDao implements TransferDao{
         } catch (Exception e) {
             throw new DaoException("Was not able to get account balance", e);
         }
+
         return false;
     }
 
@@ -74,14 +78,14 @@ public class JdbcTransferDao implements TransferDao{
         } catch (Exception e) {
             throw new DaoException("There was an error.", e);
         }
+
         return transfer;
     }
 
 
     @Override
     public boolean updateAccountBalances(Transfer transfer) {
-
-        //  Grabbing balance SQL
+        //  Grabbing initial balance from database SQL
         String grabBalanceSql = "SELECT balance FROM account WHERE user_id = ?";
 
         // Updating account balance SQL
@@ -113,12 +117,8 @@ public class JdbcTransferDao implements TransferDao{
         catch (Exception e) {
             throw new DaoException("There was an error with updating the balances.", e);
         }
-        if (senderAffected == 1 && recipientAffected == 1) {
-            return true;
-        } else {
-            return false;
-        }
 
+        return senderAffected == 1 && recipientAffected == 1;
     }
 
     @Override
@@ -154,6 +154,7 @@ public class JdbcTransferDao implements TransferDao{
                 "JOIN tenmo_user AS tut ON at.user_id = tut.user_id " +
                 "WHERE af.user_id = ? OR at.user_id = ? " +
                 "ORDER BY t.transfer_id";
+
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId, userId);
             while (results.next()){
@@ -162,6 +163,7 @@ public class JdbcTransferDao implements TransferDao{
         } catch (Exception e ) {
             throw new DaoException("There was an error getting transfers.", e);
         }
+
         return transfers;
     }
 
@@ -214,6 +216,7 @@ public class JdbcTransferDao implements TransferDao{
         } catch (Exception e) {
             throw new DaoException("There was an error locating specific transfer.", e);
         }
+
         return transfer;
     }
 
@@ -230,6 +233,7 @@ public class JdbcTransferDao implements TransferDao{
         } catch (Exception e) {
             throw new DaoException("There was an error updating the transfer.", e);
         }
+
         return rowsAffected;
     }
 
@@ -256,7 +260,6 @@ public class JdbcTransferDao implements TransferDao{
         transfer.setAmount(rowSet.getBigDecimal("amount"));
         transfer.setType(rowSet.getString("transfer_type_desc"));
         transfer.setStatus(rowSet.getString("transfer_status_desc"));
-
         return transfer;
     }
 }
